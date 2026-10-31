@@ -3,265 +3,318 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام الاستعلام عن بيانات الموظفين</title>
+    <title>نظام بصمة الوجه الذكي</title>
+    <!-- Tailwind CSS للتصميم المتجاوب مع الهواتف -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- مكتبة Face-API.js للتعرف على بصمة الوجه -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.js"></script>
     <style>
-        :root {
-            --primary-color: #4f46e5;
-            --primary-hover: #4338ca;
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border-color: #e2e8f0;
-            --radius: 12px;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body { 
-            font-family: 'Tahoma', sans-serif; 
-            background: var(--bg-color); 
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 15px;
-        }
-
-        .container { 
-            width: 100%;
-            max-width: 520px; 
-            background: var(--card-bg); 
-            padding: 30px; 
-            border-radius: var(--radius); 
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); 
-            border: 1px solid var(--border-color);
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .header h2 { 
-            color: var(--primary-color); 
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 8px; 
-        }
-
-        .header p {
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-
-        .search-box { 
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .input-group { 
-            display: flex;
-            flex-direction: column;
-            gap: 6px; 
-        }
-
-        label { 
-            font-weight: 600; 
-            color: var(--text-main); 
-            font-size: 14px;
-        }
-
-        input[type="text"] { 
-            width: 100%; 
-            padding: 12px 16px; 
-            border: 2px solid var(--border-color); 
-            border-radius: 8px; 
-            font-size: 15px; 
-            outline: none;
-            transition: all 0.3s ease;
-            background: #fff;
-        }
-
-        input[type="text"]:focus { 
-            border-color: var(--primary-color); 
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
-        }
-
-        button { 
-            background: var(--primary-color); 
-            color: white; 
-            border: none; 
-            padding: 14px; 
-            width: 100%; 
-            border-radius: 8px; 
-            font-size: 16px; 
-            font-weight: 600;
-            cursor: pointer; 
-            transition: background 0.3s ease, transform 0.1s ease;
-        }
-
-        button:hover { 
-            background: var(--primary-hover); 
-        }
-
-        button:active {
-            transform: scale(0.98);
-        }
-
-        .results-section { 
-            margin-top: 25px; 
-        }
-
-        .result-card { 
-            background: #f1f5f9; 
-            border: 1px solid var(--border-color);
-            padding: 18px; 
-            border-radius: 10px; 
-            border-right: 5px solid var(--primary-color); 
-            animation: fadeIn 0.4s ease-in-out;
-        }
-
-        .result-card h3 {
-            font-size: 16px;
-            color: var(--primary-color);
-            margin-bottom: 12px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 6px;
-        }
-
-        .result-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        .result-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .result-row span:first-child {
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .result-row span:last-child {
-            color: var(--text-main);
-            font-weight: 600;
-        }
-
-        .status-msg { 
-            text-align: center; 
-            color: var(--text-muted); 
-            margin-top: 20px; 
-            font-size: 14px;
-        }
-
-        .status-msg.error {
-            color: #ef4444;
-            background: #fef2f2;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #fee2e2;
-        }
-
-        /* تحسين التجاوب مع شاشات الهواتف الضيقة */
-        @media (max-width: 480px) {
-            .container {
-                padding: 20px;
-                margin: 10px;
-            }
-            .header h2 {
-                font-size: 20px;
-            }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
+        body { font-family: system-ui, -apple-system, sans-serif; }
+        /* انعكاس الكاميرا مثل المرآة تماماً */
+        .mirror-cam {
+            transform: scaleX(-1);
         }
     </style>
 </head>
-<body>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center p-4">
 
-<div class="container">
-    <div class="header">
-        <h2>نظام الاستعلام الوظيفي</h2>
-        <p>يرجى إدخال الاسم الرباعي بدقة لعرض البيانات</p>
-    </div>
-    
-    <div class="search-box">
-        <div class="input-group">
-            <label for="searchQuery">الاسم الرباعي </label>
-            <input type="text" id="searchQuery" placeholder="مثال: أحمد محمد علي حسن" onkeypress="checkEnter(event)">
-        </div>
+    <div class="w-full max-w-md bg-slate-800 rounded-2xl shadow-xl p-6 border border-slate-700">
         
-        <button onclick="searchData()">استعلام عن البيانات</button>
+        <!-- عنوان التطبيق -->
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-indigo-400">بصمة الوجه الذكية</h1>
+            <p id="status-msg" class="text-xs text-amber-400 mt-1">جاري تحميل نظام الذكاء الاصطناعي...</p>
+        </div>
+
+        <!-- أزرار التنقل بين التبويبات -->
+        <div class="flex bg-slate-900 p-1 rounded-xl mb-6 border border-slate-700">
+            <button onclick="switchTab('register')" id="btn-register" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-indigo-600 text-white transition">تسجيل جديد</button>
+            <button onclick="switchTab('login')" id="btn-login" class="flex-1 py-2 text-sm font-semibold rounded-lg text-slate-400 hover:text-white transition">تسجيل الدخول</button>
+        </div>
+
+        <!-- 1. قسم التسجيل (Register) -->
+        <div id="tab-register" class="space-y-4">
+            <!-- الكاميرا الدائرية على شكل مرآة -->
+            <div class="flex flex-col items-center justify-center my-2">
+                <div class="relative w-40 h-40 rounded-full overflow-hidden border-4 border-indigo-500 shadow-xl bg-black flex items-center justify-center">
+                    <video id="reg-video" autoplay playsinline muted class="w-full h-full object-cover mirror-cam"></video>
+                </div>
+                <p id="reg-face-guide" class="text-xs text-amber-400 mt-2 font-medium animate-pulse">⏳ يرجى النظر إلى الكاميرا للتعرف التلقائي...</p>
+            </div>
+
+            <!-- الحقول والحفظ (مغلقة مبدئياً ولا تفتح إلا بعد التعرف) -->
+            <div id="reg-form-container" class="space-y-4 opacity-40 pointer-events-none transition-all duration-300">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">الاسم الثلاثي واللقب</label>
+                    <input type="text" id="reg-name" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500" placeholder="مثال: أحمد محمد علي">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">الجنس</label>
+                        <select id="reg-gender" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
+                            <option value="ذكر">ذكر</option>
+                            <option value="أنثى">أنثى</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">تاريخ الميلاد</label>
+                        <input type="date" id="reg-dob" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <button onclick="registerUser()" id="btn-save" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl shadow-lg transition mt-2">
+                    حفظ وإنشاء الرمز الفريد
+                </button>
+            </div>
+
+            <!-- نتيجة الرمز بعد التسجيل -->
+            <div id="result-box" class="hidden mt-4 p-4 bg-slate-900 border border-emerald-500/50 rounded-xl text-center">
+                <p class="text-xs text-slate-400">تم حفظ بصمة وجهك وبياناتك بنجاح! احتفظ برمزك السري:</p>
+                <div id="generated-code" class="text-xl font-mono font-bold text-emerald-400 tracking-widest my-2 select-all"></div>
+                <p class="text-[10px] text-amber-400">⚠️ احتفظ بهذا الرمز، ولن يظهر مرة أخرى!</p>
+            </div>
+        </div>
+
+        <!-- 2. قسم تسجيل الدخول (Login) -->
+        <div id="tab-login" class="space-y-4 hidden">
+            <!-- الكاميرا الدائرية على شكل مرآة -->
+            <div class="flex flex-col items-center justify-center my-2">
+                <div class="relative w-40 h-40 rounded-full overflow-hidden border-4 border-emerald-500 shadow-xl bg-black flex items-center justify-center">
+                    <video id="login-video" autoplay playsinline muted class="w-full h-full object-cover mirror-cam"></video>
+                </div>
+                <p id="login-face-guide" class="text-xs text-amber-400 mt-2 font-medium animate-pulse">⏳ قف أمام الكاميرا للتعرف التلقائي على الوجه...</p>
+            </div>
+
+            <!-- حقل الرمز وزر الدخول (مغلق مبدئياً ولا يفتح إلا بعد التعرف) -->
+            <div id="login-form-container" class="space-y-4 opacity-40 pointer-events-none transition-all duration-300">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">الرمز الفريد (10 خانات)</label>
+                    <input type="text" id="login-code" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm uppercase font-mono tracking-wider focus:outline-none focus:border-indigo-500" placeholder="أدخل الرمز الخاص بك">
+                </div>
+
+                <button onclick="loginUser()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl shadow-lg transition mt-2">
+                    تسجيل الدخول وعرض البيانات
+                </button>
+            </div>
+
+            <!-- عرض البيانات عند نجاح الدخول -->
+            <div id="user-profile" class="hidden mt-4 p-4 bg-slate-900 border border-indigo-500/50 rounded-xl space-y-2">
+                <h3 class="text-sm font-bold text-indigo-400 border-b border-slate-800 pb-1">بيانات المستخدم المسجلة</h3>
+                <p class="text-xs text-slate-300"><strong>الاسم:</strong> <span id="profile-name"></span></p>
+                <p class="text-xs text-slate-300"><strong>الجنس:</strong> <span id="profile-gender"></span></p>
+                <p class="text-xs text-slate-300"><strong>تاريخ الميلاد:</strong> <span id="profile-dob"></span></p>
+            </div>
+        </div>
+
     </div>
 
-    <div class="results-section" id="results"></div>
-</div>
+    <script>
+        // رابط Google Apps Script الخاص بك المدمج مباشرة
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwKtT04cSafQYuobpY5QxmL-PFFcWQU337NWwLFSsjOCS2jJFR9_L_74QrLwLYiJmo/exec";
 
-<script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzTlImFOWXEjWto_gY_YwoRU3u96ndl8Xzpq1Zlug838N8f99rDhiPA01hUnzaQuOB_/exec";
+        let activeStream = null;
+        let regDescriptor = null;
+        let loginDescriptor = null;
+        let detectionInterval = null;
 
-    function checkEnter(e) {
-        if (e.key === 'Enter') {
-            searchData();
+        // تحميل نماذج الذكاء الاصطناعي برابط مستقر وسريع جداً
+        async function loadModels() {
+            const statusMsg = document.getElementById('status-msg');
+            try {
+                const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model/';
+                
+                await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+                await faceapi.nets.faceLandmarkTinyNet.loadFromUri(MODEL_URL);
+                await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+                
+                statusMsg.innerText = "✨ النظام جاهز، يرجى السماح بالكاميرا";
+                statusMsg.className = "text-xs text-emerald-400 mt-1";
+                
+                startCamera('reg');
+            } catch (error) {
+                console.error(error);
+                statusMsg.innerText = "❌ تعذر تحميل النماذج. تأكد من اتصال الإنترنت وحداثة المتصفح.";
+                statusMsg.className = "text-xs text-rose-400 mt-1";
+            }
         }
-    }
 
-    function searchData() {
-        const query = document.getElementById('searchQuery').value.trim();
-        const box = document.getElementById('results');
-
-        if (!query) {
-            box.innerHTML = '<p class="status-msg error">الرجاء إدخال الاسم الرباعي كاملأً في حقل البحث.</p>';
-            return;
+        async function startCamera(type) {
+            stopCamera();
+            try {
+                const videoElement = document.getElementById(`${type}-video`);
+                activeStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+                videoElement.srcObject = activeStream;
+                
+                // بدء فحص الوجه التلقائي
+                startAutoDetection(type);
+            } catch (err) {
+                alert("تعذر الوصول إلى الكاميرا. تأكد من إعطاء الصلاحيات وأن الموقع يعمل عبر HTTPS.");
+            }
         }
 
-        box.innerHTML = '<p class="status-msg">جاري البحث في السجلات...</p>';
+        function stopCamera() {
+            if (activeStream) {
+                activeStream.getTracks().forEach(track => track.stop());
+                activeStream = null;
+            }
+            if (detectionInterval) {
+                clearInterval(detectionInterval);
+                detectionInterval = null;
+            }
+        }
 
-        fetch(`${WEB_APP_URL}?name=${encodeURIComponent(query)}`)
-            .then(res => res.json())
-            .then(data => {
-                box.innerHTML = '';
+        // التعرف التلقائي وفتح الحقول فور رصد الوجه
+        function startAutoDetection(type) {
+            const video = document.getElementById(`${type}-video`);
+            
+            detectionInterval = setInterval(async () => {
+                if (video.paused || video.ended) return;
 
-                if (data.length === 0) {
-                    box.innerHTML = '<p class="status-msg error">عذراً، لم يتم العثور على مطابقة تامة لهذا الاسم الرباعي.</p>';
-                    return;
+                const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks(true).withFaceDescriptor();
+
+                if (detection) {
+                    const descriptorArray = Array.from(detection.descriptor);
+
+                    if (type === 'reg' && !regDescriptor) {
+                        regDescriptor = descriptorArray;
+                        document.getElementById('reg-form-container').classList.remove('opacity-40', 'pointer-events-none');
+                        document.getElementById('reg-face-guide').innerText = "✅ تم التعرف على الوجه وفتح الحقول بنجاح!";
+                        document.getElementById('reg-face-guide').className = "text-xs text-emerald-400 mt-2 font-bold";
+                    } 
+                    else if (type === 'login' && !loginDescriptor) {
+                        loginDescriptor = descriptorArray;
+                        document.getElementById('login-form-container').classList.remove('opacity-40', 'pointer-events-none');
+                        document.getElementById('login-face-guide').innerText = "✅ تم فحص بصمة الوجه وفتح حقل الرمز!";
+                        document.getElementById('login-face-guide').className = "text-xs text-emerald-400 mt-2 font-bold";
+                    }
                 }
+            }, 800);
+        }
 
-                data.forEach(emp => {
-                    const card = document.createElement('div');
-                    card.className = 'result-card';
-                    card.innerHTML = `
-                        <h3>نتيجة البحث</h3>
-                        <div class="result-row">
-                            <span>الاسم الرباعي:</span>
-                            <span>${emp.fullName}</span>
-                        </div>
-                        <div class="result-row">
-                            <span>اسم الأم:</span>
-                            <span>${emp.motherName}</span>
-                        </div>
-                        <div class="result-row">
-                            <span>الرقم الوظيفي:</span>
-                            <span>${emp.empId}</span>
-                        </div>
-                    `;
-                    box.appendChild(card);
+        function switchTab(tab) {
+            stopCamera();
+            regDescriptor = null;
+            loginDescriptor = null;
+
+            if(tab === 'register') {
+                document.getElementById('tab-register').classList.remove('hidden');
+                document.getElementById('tab-login').classList.add('hidden');
+                document.getElementById('btn-register').className = "flex-1 py-2 text-sm font-semibold rounded-lg bg-indigo-600 text-white transition";
+                document.getElementById('btn-login').className = "flex-1 py-2 text-sm font-semibold rounded-lg text-slate-400 hover:text-white transition";
+                
+                document.getElementById('reg-form-container').classList.add('opacity-40', 'pointer-events-none');
+                document.getElementById('reg-face-guide').innerText = "⏳ يرجى النظر إلى الكاميرا للتعرف التلقائي...";
+                document.getElementById('reg-face-guide').className = "text-xs text-amber-400 mt-2 font-medium animate-pulse";
+                startCamera('reg');
+            } else {
+                document.getElementById('tab-login').classList.remove('hidden');
+                document.getElementById('tab-register').classList.add('hidden');
+                document.getElementById('btn-login').className = "flex-1 py-2 text-sm font-semibold rounded-lg bg-indigo-600 text-white transition";
+                document.getElementById('btn-register').className = "flex-1 py-2 text-sm font-semibold rounded-lg text-slate-400 hover:text-white transition";
+                
+                document.getElementById('login-form-container').classList.add('opacity-40', 'pointer-events-none');
+                document.getElementById('login-face-guide').innerText = "⏳ قف أمام الكاميرا للتعرف التلقائي على الوجه...";
+                document.getElementById('login-face-guide').className = "text-xs text-amber-400 mt-2 font-medium animate-pulse";
+                startCamera('login');
+            }
+        }
+
+        function generateUniqueCode() {
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const nums = "0123456789";
+            let code = "";
+            for (let i = 0; i < 5; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+            for (let i = 0; i < 5; i++) code += nums.charAt(Math.floor(Math.random() * nums.length));
+            return code;
+        }
+
+        async function registerUser() {
+            const name = document.getElementById('reg-name').value.trim();
+            const gender = document.getElementById('reg-gender').value;
+            const dob = document.getElementById('reg-dob').value;
+
+            if(!name || !dob || !regDescriptor) {
+                alert("الرجاء إكمال جميع الحقول والتأكد من رصد الوجه تلقائياً!");
+                return;
+            }
+
+            const uniqueCode = generateUniqueCode();
+            const payload = {
+                action: "register",
+                code: uniqueCode,
+                name: name,
+                gender: gender,
+                dob: dob,
+                faceDescriptor: JSON.stringify(regDescriptor)
+            };
+
+            const btn = document.getElementById('btn-save');
+            btn.innerText = "جاري الحفظ في Google Sheets...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify(payload)
                 });
-            })
-            .catch(err => {
-                console.error(err);
-                box.innerHTML = '<p class="status-msg error">حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة لاحقاً.</p>';
-            });
-    }
-</script>
+                const result = await response.json();
+                
+                if(result.status === "success") {
+                    document.getElementById('generated-code').innerText = uniqueCode;
+                    document.getElementById('result-box').classList.remove('hidden');
+                } else {
+                    alert("حدث خطأ: " + result.message);
+                }
+            } catch(e) {
+                alert("فشل الاتصال بـ Google Sheets. تأكد من صحة الرابط البرمجي.");
+            } finally {
+                btn.innerText = "حفظ وإنشاء الرمز الفريد";
+                btn.disabled = false;
+            }
+        }
 
+        async function loginUser() {
+            const code = document.getElementById('login-code').value.trim().toUpperCase();
+            if(!code || !loginDescriptor) {
+                alert("الرجاء إدخال الرمز وانتظار التعرف التلقائي على الوجه!");
+                return;
+            }
+
+            const payload = {
+                action: "login",
+                code: code
+            };
+
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if(result.status === "success") {
+                    const storedDescriptor = new Float32Array(JSON.parse(result.data.faceDescriptor));
+                    const distance = faceapi.euclideanDistance(loginDescriptor, storedDescriptor);
+                    
+                    if (distance < 0.6) {
+                        document.getElementById('profile-name').innerText = result.data.name;
+                        document.getElementById('profile-gender').innerText = result.data.gender;
+                        document.getElementById('profile-dob').innerText = result.data.dob;
+                        document.getElementById('user-profile').classList.remove('hidden');
+                        alert("🎉 تمت مطابقة بصمة الوجه والرمز بنجاح!");
+                    } else {
+                        alert("❌ بصمة الوجه لا تتطابق مع الرمز المدخل!");
+                    }
+                } else {
+                    alert("فشل تسجيل الدخول: " + result.message);
+                }
+            } catch(e) {
+                alert("حدث خطأ في الاتصال أو مطابقة البيانات.");
+            }
+        }
+
+        window.onload = loadModels;
+    </script>
 </body>
 </html>
