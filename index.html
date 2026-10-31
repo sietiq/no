@@ -2,323 +2,265 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>استمارة تسجيل المريض الراقد</title>
-    <!-- خط Cairo الجميل والمتناسق -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام الاستعلام عن بيانات الموظفين</title>
     <style>
-        * {
-            box-sizing: border-box;
-            font-family: 'Cairo', sans-serif;
-            -webkit-tap-highlight-color: transparent;
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --radius: 12px;
         }
-        body {
-            background-color: #f8fafc;
-            margin: 0;
-            padding: 12px;
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body { 
+            font-family: 'Tahoma', sans-serif; 
+            background: var(--bg-color); 
+            color: var(--text-main);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            padding: 15px;
         }
-        .container {
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+
+        .container { 
             width: 100%;
-            max-width: 600px;
+            max-width: 520px; 
+            background: var(--card-bg); 
+            padding: 30px; 
+            border-radius: var(--radius); 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); 
+            border: 1px solid var(--border-color);
         }
-        h2 {
+
+        .header {
             text-align: center;
-            color: #1e3a8a;
-            margin-bottom: 20px;
-            font-size: 22px;
+            margin-bottom: 25px;
         }
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-        .form-group {
-            margin-bottom: 12px;
-        }
-        .form-group.full-width {
-            grid-column: span 2;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #334155;
-            font-size: 13px;
-        }
-        input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 10px;
-            font-size: 15px; /* حجم 15px يمنع التكبير التلقائي المزعج في آيفون وسامسونج */
-            outline: none;
-            background-color: #fff;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        input:focus, select:focus, textarea:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-        }
-        
-        /* تصميم زر الإرسال */
-        button {
-            background-color: #2563eb;
-            color: white;
-            border: none;
-            padding: 14px;
-            width: 100%;
-            border-radius: 10px;
-            font-size: 16px;
+
+        .header h2 { 
+            color: var(--primary-color); 
+            font-size: 24px;
             font-weight: 700;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            margin-top: 10px;
-        }
-        button:hover {
-            background-color: #1d4ed8;
-        }
-        button:disabled {
-            background-color: #94a3b8;
-            cursor: not-allowed;
+            margin-bottom: 8px; 
         }
 
-        /* حاوية شريط النسبة المئوية */
-        .progress-container {
-            margin-top: 15px;
-            display: none;
-        }
-        .progress-bar-bg {
-            width: 100%;
-            background-color: #e2e8f0;
-            border-radius: 8px;
-            overflow: hidden;
-            height: 12px;
-        }
-        .progress-bar-fill {
-            height: 100%;
-            width: 0%;
-            background-color: #2563eb;
-            transition: width 0.1s linear;
-            border-radius: 8px;
-        }
-        .progress-text {
-            text-align: center;
-            font-size: 13px;
-            font-weight: 600;
-            color: #475569;
-            margin-top: 5px;
-        }
-
-        /* رسالة النجاح أو الخطأ */
-        .alert {
-            margin-top: 15px;
-            padding: 12px;
-            border-radius: 10px;
-            text-align: center;
-            font-weight: 600;
-            display: none;
+        .header p {
+            color: var(--text-muted);
             font-size: 14px;
         }
-        .alert.success {
-            background-color: #d1fae5;
-            color: #065f46;
-            display: block;
-        }
-        .alert.error {
-            background-color: #fee2e2;
-            color: #991b1b;
-            display: block;
+
+        .search-box { 
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
-        /* ميديا كويري لتتلاءم تماماً مع الهواتف الصغيرة */
-        @media (max-width: 576px) {
-            body {
-                padding: 8px;
-            }
+        .input-group { 
+            display: flex;
+            flex-direction: column;
+            gap: 6px; 
+        }
+
+        label { 
+            font-weight: 600; 
+            color: var(--text-main); 
+            font-size: 14px;
+        }
+
+        input[type="text"] { 
+            width: 100%; 
+            padding: 12px 16px; 
+            border: 2px solid var(--border-color); 
+            border-radius: 8px; 
+            font-size: 15px; 
+            outline: none;
+            transition: all 0.3s ease;
+            background: #fff;
+        }
+
+        input[type="text"]:focus { 
+            border-color: var(--primary-color); 
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        button { 
+            background: var(--primary-color); 
+            color: white; 
+            border: none; 
+            padding: 14px; 
+            width: 100%; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            font-weight: 600;
+            cursor: pointer; 
+            transition: background 0.3s ease, transform 0.1s ease;
+        }
+
+        button:hover { 
+            background: var(--primary-hover); 
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .results-section { 
+            margin-top: 25px; 
+        }
+
+        .result-card { 
+            background: #f1f5f9; 
+            border: 1px solid var(--border-color);
+            padding: 18px; 
+            border-radius: 10px; 
+            border-right: 5px solid var(--primary-color); 
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .result-card h3 {
+            font-size: 16px;
+            color: var(--primary-color);
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 6px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .result-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .result-row span:first-child {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .result-row span:last-child {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .status-msg { 
+            text-align: center; 
+            color: var(--text-muted); 
+            margin-top: 20px; 
+            font-size: 14px;
+        }
+
+        .status-msg.error {
+            color: #ef4444;
+            background: #fef2f2;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #fee2e2;
+        }
+
+        /* تحسين التجاوب مع شاشات الهواتف الضيقة */
+        @media (max-width: 480px) {
             .container {
-                padding: 15px;
-                border-radius: 12px;
+                padding: 20px;
+                margin: 10px;
             }
-            .form-grid {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
-            .form-group.full-width {
-                grid-column: span 1;
-            }
-            h2 {
+            .header h2 {
                 font-size: 20px;
             }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>استمارة المريض الراقد</h2>
-    <form id="patientForm">
-        <div class="form-grid">
-            <!-- اسم المريض -->
-            <div class="form-group">
-                <label for="patientName">اسم المريض:</label>
-                <input type="text" id="patientName" name="patientName" required placeholder="الاسم الثلاثي واللقب">
-            </div>
-
-            <!-- اسم الأم -->
-            <div class="form-group">
-                <label for="motherName">اسم الأم:</label>
-                <input type="text" id="motherName" name="motherName" required placeholder="اسم الأم الثلاثي">
-            </div>
-
-            <!-- الجنس -->
-            <div class="form-group">
-                <label for="gender">الجنس:</label>
-                <select id="gender" name="gender" required>
-                    <option value="">اختر الجنس</option>
-                    <option value="ذكر">ذكر</option>
-                    <option value="أنثى">أنثى</option>
-                </select>
-            </div>
-
-            <!-- العمر -->
-            <div class="form-group">
-                <label for="age">العمر:</label>
-                <input type="number" id="age" name="age" required min="0" max="120" placeholder="العمر بالسنة">
-            </div>
-
-            <!-- السكن -->
-            <div class="form-group">
-                <label for="address">السكن:</label>
-                <input type="text" id="address" name="address" required placeholder="المنطقة / المحافظة">
-            </div>
-
-            <!-- رقم الطبلة -->
-            <div class="form-group">
-                <label for="fileNumber">رقم الطبلة:</label>
-                <input type="text" id="fileNumber" name="fileNumber" required placeholder="رقم الملف الطبي">
-            </div>
-
-            <!-- رقم الهاتف -->
-            <div class="form-group">
-                <label for="phone">رقم الهاتف:</label>
-                <input type="tel" id="phone" name="phone" placeholder="07xxxxxxxx">
-            </div>
-
-            <!-- الأخصائي -->
-            <div class="form-group">
-                <label for="specialist">الأخصائي المشرف:</label>
-                <input type="text" id="specialist" name="specialist" required placeholder="اسم الطبيب الأخصائي">
-            </div>
-
-            <!-- تاريخ الدخول -->
-            <div class="form-group">
-                <label for="admissionDate">تاريخ الدخول:</label>
-                <input type="date" id="admissionDate" name="admissionDate" required>
-            </div>
-
-            <!-- التشخيص -->
-            <div class="form-group full-width">
-                <label for="diagnosis">التشخيص:</label>
-                <textarea id="diagnosis" name="diagnosis" rows="3" required placeholder="التشخيص السريري المبدئي..."></textarea>
-            </div>
+    <div class="header">
+        <h2>نظام الاستعلام الوظيفي</h2>
+        <p>يرجى إدخال الاسم الرباعي بدقة لعرض البيانات</p>
+    </div>
+    
+    <div class="search-box">
+        <div class="input-group">
+            <label for="searchQuery">الاسم الرباعي واللقب</label>
+            <input type="text" id="searchQuery" placeholder="مثال: أحمد محمد علي حسن" onkeypress="checkEnter(event)">
         </div>
-
-        <button type="submit" id="submitBtn">حفظ وإرسال البيانات</button>
         
-        <!-- شريط النسبة المئوية -->
-        <div id="progressContainer" class="progress-container">
-            <div class="progress-bar-bg">
-                <div id="progressBarFill" class="progress-bar-fill"></div>
-            </div>
-            <div id="progressText" class="progress-text">جاري الإرسال: 0%</div>
-        </div>
+        <button onclick="searchData()">استعلام عن البيانات</button>
+    </div>
 
-        <div id="responseMessage" class="alert"></div>
-    </form>
+    <div class="results-section" id="results"></div>
 </div>
 
 <script>
-    // ⚠️ ضع رابط الـ Web App الخاص بـ Google Apps Script هنا حصراً بين علامتي التنصيص
-    const SCRIPT_URL = 'ضع_رابط_الـ_Web_App_هنا';
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzTlImFOWXEjWto_gY_YwoRU3u96ndl8Xzpq1Zlug838N8f99rDhiPA01hUnzaQuOB_/exec";
 
-    // تعيين تاريخ اليوم تلقائياً لحقل تاريخ الدخول
-    document.getElementById('admissionDate').valueAsDate = new Date();
+    function checkEnter(e) {
+        if (e.key === 'Enter') {
+            searchData();
+        }
+    }
 
-    const form = document.getElementById('patientForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const responseMessage = document.getElementById('responseMessage');
-    const progressContainer = document.getElementById('progressContainer');
-    const progressBarFill = document.getElementById('progressBarFill');
-    const progressText = document.getElementById('progressText');
+    function searchData() {
+        const query = document.getElementById('searchQuery').value.trim();
+        const box = document.getElementById('results');
 
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // تعطيل الزر وإظهار شريط التقدم
-        submitBtn.disabled = true;
-        submitBtn.style.display = 'none';
-        progressContainer.style.display = 'block';
-        responseMessage.style.display = 'none';
-        
-        let progress = 0;
-        progressBarFill.style.width = '0%';
-        progressText.textContent = 'جاري الإرسال: 0%';
+        if (!query) {
+            box.innerHTML = '<p class="status-msg error">الرجاء إدخال الاسم الرباعي كاملأً في حقل البحث.</p>';
+            return;
+        }
 
-        // محاكاة حركة نسبة التقدم بانتظام استجابة للاتصال
-        let interval = setInterval(() => {
-            if (progress < 90) {
-                progress += Math.floor(Math.random() * 15) + 5;
-                if (progress > 90) progress = 90;
-                progressBarFill.style.width = progress + '%';
-                progressText.textContent = `جاري الإرسال: ${progress}%`;
-            }
-        }, 120);
+        box.innerHTML = '<p class="status-msg">جاري البحث في السجلات...</p>';
 
-        const formData = new FormData(form);
-        const data = {};
-        formData.forEach((value, key) => (data[key] = value));
+        fetch(`${WEB_APP_URL}?name=${encodeURIComponent(query)}`)
+            .then(res => res.json())
+            .then(data => {
+                box.innerHTML = '';
 
-        fetch(SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        })
-        .then(() => {
-            clearInterval(interval);
-            progressBarFill.style.width = '100%';
-            progressText.textContent = 'جاري الإرسال: 100%';
-            
-            setTimeout(() => {
-                progressContainer.style.display = 'none';
-                responseMessage.textContent = 'تم حفظ بيانات المريض بنجاح في النظام!';
-                responseMessage.className = 'alert success';
-                form.reset();
-                document.getElementById('admissionDate').valueAsDate = new Date();
-                submitBtn.disabled = false;
-                submitBtn.style.display = 'block';
-            }, 400);
-        })
-        .catch(error => {
-            clearInterval(interval);
-            console.error('Error!', error);
-            progressContainer.style.display = 'none';
-            responseMessage.textContent = 'حدث خطأ أثناء الحفظ، يرجى المحاولة مرة أخرى.';
-            responseMessage.className = 'alert error';
-            submitBtn.disabled = false;
-            submitBtn.style.display = 'block';
-        });
-    });
+                if (data.length === 0) {
+                    box.innerHTML = '<p class="status-msg error">عذراً، لم يتم العثور على مطابقة تامة لهذا الاسم الرباعي.</p>';
+                    return;
+                }
+
+                data.forEach(emp => {
+                    const card = document.createElement('div');
+                    card.className = 'result-card';
+                    card.innerHTML = `
+                        <h3>نتيجة البحث</h3>
+                        <div class="result-row">
+                            <span>الاسم الرباعي:</span>
+                            <span>${emp.fullName}</span>
+                        </div>
+                        <div class="result-row">
+                            <span>اسم الأم:</span>
+                            <span>${emp.motherName}</span>
+                        </div>
+                        <div class="result-row">
+                            <span>الرقم الوظيفي:</span>
+                            <span>${emp.empId}</span>
+                        </div>
+                    `;
+                    box.appendChild(card);
+                });
+            })
+            .catch(err => {
+                console.error(err);
+                box.innerHTML = '<p class="status-msg error">حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة لاحقاً.</p>';
+            });
+    }
 </script>
 
 </body>
