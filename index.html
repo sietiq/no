@@ -3,277 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام بصمة الوجه الذكي</title>
-    <!-- Tailwind CSS للتصميم -->
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>لوحة التحكم - سجل الحضور والمشاركات</title>
     <style>
-        body { font-family: system-ui, -apple-system, sans-serif; }
-        .mirror-cam { transform: scaleX(-1); }
+        body {
+            font-family: Tahoma, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+        }
+        .login-container, .dashboard-container {
+            max-width: 900px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .dashboard-container { display: none; text-align: right; max-width: 1100px; }
+        input[type="password"] {
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            width: 250px;
+            margin-left: 10px;
+        }
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        button:hover { background: #4338ca; }
+        .error { color: #e53e3e; margin-top: 10px; display: none; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            text-align: center;
+            font-size: 14px;
+        }
+        th { background: #f8fafc; color: #334155; }
+        img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; cursor: pointer; }
+        a { color: #2563eb; text-decoration: none; font-weight: bold; }
+        a:hover { text-decoration: underline; }
+        h2 { color: #1e293b; }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center p-4">
+<body>
 
-    <div class="w-full max-w-md bg-slate-800 rounded-2xl shadow-xl p-6 border border-slate-700">
-        
-        <!-- عنوان التطبيق -->
-        <div class="text-center mb-6">
-            <h1 class="text-2xl font-bold text-indigo-400">بصمة الوجه الذكية</h1>
-            <p id="status-msg" class="text-xs text-emerald-400 mt-1">✨ الكاميرا جاهزة، انظر إليها والتقط البصمة</p>
+    <!-- نافذة تسجيل الدخول -->
+    <div class="login-container" id="loginBox">
+        <h2>🔒 لوحة التحكم الآمنة</h2>
+        <p>الرجاء إدخال كلمة المرور للوصول إلى السجلات:</p>
+        <input type="password" id="passInput" placeholder="كلمة المرور">
+        <button onclick="checkLogin()">دخول</button>
+        <div class="error" id="errorMsg">كلمة المرور غير صحيحة!</div>
+    </div>
+
+    <!-- لوحة عرض البيانات -->
+    <div class="dashboard-container" id="dashBox">
+        <h2>📊 سجلات الحضور والمواقع التقاطية</h2>
+        <p>البيانات يتم تحديثها مباشرة من Google Sheets</p>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>الوقت والتاريخ</th>
+                        <th>عنوان الـ IP</th>
+                        <th>معلومات الجهاز</th>
+                        <th>الموقع الجغرافي (اضغط للفتح)</th>
+                        <th>الصورة الملتقطة</th>
+                    </tr>
+                </thead>
+                <tbody id="dataTable">
+                    <tr><td colspan="5">جاري جلب البيانات...</td></tr>
+                </tbody>
+            </table>
         </div>
-
-        <!-- أزرار التنقل بين التبويبات -->
-        <div class="flex bg-slate-900 p-1 rounded-xl mb-6 border border-slate-700">
-            <button onclick="switchTab('register')" id="btn-register" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-indigo-600 text-white transition">تسجيل جديد</button>
-            <button onclick="switchTab('login')" id="btn-login" class="flex-1 py-2 text-sm font-semibold rounded-lg text-slate-400 hover:text-white transition">تسجيل الدخول</button>
-        </div>
-
-        <!-- 1. قسم التسجيل (Register) -->
-        <div id="tab-register" class="space-y-4">
-            <!-- الكاميرا الدائرية -->
-            <div class="flex flex-col items-center justify-center my-2">
-                <div class="relative w-40 h-40 rounded-full overflow-hidden border-4 border-indigo-500 shadow-xl bg-black flex items-center justify-center">
-                    <video id="reg-video" autoplay playsinline muted class="w-full h-full object-cover mirror-cam"></video>
-                    <canvas id="reg-canvas" class="hidden"></canvas>
-                </div>
-                
-                <!-- زر التقاط الوجه الفوري والواضح -->
-                <button type="button" onclick="captureFaceData('reg')" class="mt-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-md transition flex items-center gap-2">
-                    📸 التقاط بصمة الوجه وفتح الحقول
-                </button>
-                <p id="reg-face-guide" class="text-xs text-slate-400 mt-1">اضغط الزر بعد أن يكون وجهك بمنتصف الدائرة</p>
-            </div>
-
-            <!-- الحقول والحفظ (تفتح فور الضغط على زر الالتقاط) -->
-            <div id="reg-form-container" class="space-y-4 opacity-40 pointer-events-none transition-all duration-300">
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">الاسم الثلاثي واللقب</label>
-                    <input type="text" id="reg-name" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500" placeholder="مثال: أحمد محمد علي">
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">الجنس</label>
-                        <select id="reg-gender" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
-                            <option value="ذكر">ذكر</option>
-                            <option value="أنثى">أنثى</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">تاريخ الميلاد</label>
-                        <input type="date" id="reg-dob" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
-                    </div>
-                </div>
-
-                <button onclick="registerUser()" id="btn-save" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl shadow-lg transition mt-2">
-                    حفظ وإنشاء الرمز الفريد
-                </button>
-            </div>
-
-            <!-- نتيجة الرمز بعد التسجيل -->
-            <div id="result-box" class="hidden mt-4 p-4 bg-slate-900 border border-emerald-500/50 rounded-xl text-center">
-                <p class="text-xs text-slate-400">تم حفظ بصمة وجهك وبياناتك بنجاح! احتفظ برمزك السري:</p>
-                <div id="generated-code" class="text-xl font-mono font-bold text-emerald-400 tracking-widest my-2 select-all"></div>
-                <p class="text-[10px] text-amber-400">⚠️ احتفظ بهذا الرمز، ولن يظهر مرة أخرى!</p>
-            </div>
-        </div>
-
-        <!-- 2. قسم تسجيل الدخول (Login) -->
-        <div id="tab-login" class="space-y-4 hidden">
-            <!-- الكاميرا الدائرية -->
-            <div class="flex flex-col items-center justify-center my-2">
-                <div class="relative w-40 h-40 rounded-full overflow-hidden border-4 border-emerald-500 shadow-xl bg-black flex items-center justify-center">
-                    <video id="login-video" autoplay playsinline muted class="w-full h-full object-cover mirror-cam"></video>
-                    <canvas id="login-canvas" class="hidden"></canvas>
-                </div>
-                
-                <!-- زر التقاط التحقق الفوري -->
-                <button type="button" onclick="captureFaceData('login')" class="mt-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-md transition flex items-center gap-2">
-                    📸 التقاط بصمة الوجه للتحقق
-                </button>
-                <p id="login-face-guide" class="text-xs text-slate-400 mt-1">اضغط الزر لتأكيد وجهك وإظهار حقل الرمز</p>
-            </div>
-
-            <!-- حقل الرمز وزر الدخول -->
-            <div id="login-form-container" class="space-y-4 opacity-40 pointer-events-none transition-all duration-300">
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">الرمز الفريد (10 خانات)</label>
-                    <input type="text" id="login-code" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm uppercase font-mono tracking-wider focus:outline-none focus:border-indigo-500" placeholder="أدخل الرمز الخاص بك">
-                </div>
-
-                <button onclick="loginUser()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl shadow-lg transition mt-2">
-                    تسجيل الدخول وعرض البيانات
-                </button>
-            </div>
-
-            <!-- عرض البيانات عند نجاح الدخول -->
-            <div id="user-profile" class="hidden mt-4 p-4 bg-slate-900 border border-indigo-500/50 rounded-xl space-y-2">
-                <h3 class="text-sm font-bold text-indigo-400 border-b border-slate-800 pb-1">بيانات المستخدم المسجلة</h3>
-                <p class="text-xs text-slate-300"><strong>الاسم:</strong> <span id="profile-name"></span></p>
-                <p class="text-xs text-slate-300"><strong>الجنس:</strong> <span id="profile-gender"></span></p>
-                <p class="text-xs text-slate-300"><strong>تاريخ الميلاد:</strong> <span id="profile-dob"></span></p>
-            </div>
-        </div>
-
     </div>
 
     <script>
-        // الرابط البرمجي الجديد المدمج بنجاح
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLYDjKWE931-erPzqrqx_Xhgd_S3PurLibf018m_se_nwXuJznMSrf3Gp22uEcljsg/exec";
+        // رابط السكريبت الخاص بك
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzS3Siq7uh6lawPsafgjKWALIv-xtUMCVEsM3nkR2zd6PUTb6-xKTJ6imcjrt8V3OJd/exec";
 
-        let activeStream = null;
-        let regFaceBase64 = null;
-        let loginFaceBase64 = null;
-
-        // تشغيل الكاميرا فور فتح الصفحة
-        window.onload = () => startCamera('reg');
-
-        async function startCamera(type) {
-            stopCamera();
-            try {
-                const videoElement = document.getElementById(`${type}-video`);
-                activeStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
-                videoElement.srcObject = activeStream;
-            } catch (err) {
-                alert("تعذر الوصول إلى الكاميرا. تأكد من إعطاء أذونات المتصفح.");
-            }
-        }
-
-        function stopCamera() {
-            if (activeStream) {
-                activeStream.getTracks().forEach(track => track.stop());
-                activeStream = null;
-            }
-        }
-
-        function switchTab(tab) {
-            stopCamera();
-            if(tab === 'register') {
-                document.getElementById('tab-register').classList.remove('hidden');
-                document.getElementById('tab-login').classList.add('hidden');
-                document.getElementById('btn-register').className = "flex-1 py-2 text-sm font-semibold rounded-lg bg-indigo-600 text-white transition";
-                document.getElementById('btn-login').className = "flex-1 py-2 text-sm font-semibold rounded-lg text-slate-400 hover:text-white transition";
-                
-                document.getElementById('reg-form-container').classList.add('opacity-40', 'pointer-events-none');
-                startCamera('reg');
-            } else {
-                document.getElementById('tab-login').classList.remove('hidden');
-                document.getElementById('tab-register').classList.add('hidden');
-                document.getElementById('btn-login').className = "flex-1 py-2 text-sm font-semibold rounded-lg bg-indigo-600 text-white transition";
-                document.getElementById('btn-register').className = "flex-1 py-2 text-sm font-semibold rounded-lg text-slate-400 hover:text-white transition";
-                
-                document.getElementById('login-form-container').classList.add('opacity-40', 'pointer-events-none');
-                startCamera('login');
-            }
-        }
-
-        // التقاط البصمة وفتح الحقول مباشرة
-        function captureFaceData(type) {
-            const video = document.getElementById(`${type}-video`);
-            const canvas = document.getElementById(`${type}-canvas`);
-            canvas.width = video.videoWidth || 320;
-            canvas.height = video.videoHeight || 240;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        async function checkLogin() {
+            const pass = document.getElementById("passInput").value;
+            const errorMsg = document.getElementById("errorMsg");
             
-            const base64Image = canvas.toDataURL('image/jpeg', 0.8);
-
-            if(type === 'reg') {
-                regFaceBase64 = base64Image;
-                document.getElementById('reg-form-container').classList.remove('opacity-40', 'pointer-events-none');
-                document.getElementById('reg-face-guide').innerText = "✅ تم التقاط بصمة الوجه وفتح الحقول بنجاح!";
-                document.getElementById('reg-face-guide').className = "text-xs text-emerald-400 mt-1 font-bold";
-            } else {
-                loginFaceBase64 = base64Image;
-                document.getElementById('login-form-container').classList.remove('opacity-40', 'pointer-events-none');
-                document.getElementById('login-face-guide').innerText = "✅ تم التقاط بصمة التحقق وفتح حقل الرمز!";
-                document.getElementById('login-face-guide').className = "text-xs text-emerald-400 mt-1 font-bold";
-            }
-        }
-
-        function generateUniqueCode() {
-            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            const nums = "0123456789";
-            let code = "";
-            for (let i = 0; i < 5; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
-            for (let i = 0; i < 5; i++) code += nums.charAt(Math.floor(Math.random() * nums.length));
-            return code;
-        }
-
-        async function registerUser() {
-            const name = document.getElementById('reg-name').value.trim();
-            const gender = document.getElementById('reg-gender').value;
-            const dob = document.getElementById('reg-dob').value;
-
-            if(!name || !dob || !regFaceBase64) {
-                alert("الرجاء التقاط بصمة الوجه وإكمال جميع الحقول!");
-                return;
-            }
-
-            const uniqueCode = generateUniqueCode();
-            const payload = {
-                action: "register",
-                code: uniqueCode,
-                name: name,
-                gender: gender,
-                dob: dob,
-                faceDescriptor: regFaceBase64
-            };
-
-            const btn = document.getElementById('btn-save');
-            btn.innerText = "جاري الحفظ في Google Sheets...";
-            btn.disabled = true;
-
             try {
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: "POST",
-                    body: JSON.stringify(payload)
-                });
-                const result = await response.json();
+                let res = await fetch(`${SCRIPT_URL}?action=verify&pass=${encodeURIComponent(pass)}`);
+                let data = await res.json();
                 
-                if(result.status === "success") {
-                    document.getElementById('generated-code').innerText = uniqueCode;
-                    document.getElementById('result-box').classList.remove('hidden');
+                if (data.success) {
+                    document.getElementById("loginBox").style.display = "none";
+                    document.getElementById("dashBox").style.display = "block";
+                    loadData();
                 } else {
-                    alert("حدث خطأ: " + result.message);
+                    errorMsg.style.display = "block";
                 }
-            } catch(e) {
-                alert("فشل الاتصال بـ Google Sheets.");
-            } finally {
-                btn.innerText = "حفظ وإنشاء الرمز الفريد";
-                btn.disabled = false;
+            } catch (e) {
+                alert("حدث خطأ في الاتصال بالخادم.");
             }
         }
 
-        async function loginUser() {
-            const code = document.getElementById('login-code').value.trim().toUpperCase();
-            if(!code || !loginFaceBase64) {
-                alert("الرجاء التقاط بصمة الوجه وإدخال الرمز!");
-                return;
-            }
-
-            const payload = {
-                action: "login",
-                code: code
-            };
-
+        async function loadData() {
             try {
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: "POST",
-                    body: JSON.stringify(payload)
-                });
-                const result = await response.json();
+                let res = await fetch(`${SCRIPT_URL}?action=getData`);
+                let rows = await res.json();
+                let tbody = document.getElementById("dataTable");
+                tbody.innerHTML = "";
 
-                if(result.status === "success") {
-                    document.getElementById('profile-name').innerText = result.data.name;
-                    document.getElementById('profile-gender').innerText = result.data.gender;
-                    document.getElementById('profile-dob').innerText = result.data.dob;
-                    document.getElementById('user-profile').classList.remove('hidden');
-                    alert("🎉 تم تسجيل الدخول وعرض البيانات بنجاح!");
-                } else {
-                    alert("فشل تسجيل الدخول: " + result.message);
+                if (rows.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5">لا توجد سجلات حتى الآن.</td></tr>`;
+                    return;
                 }
-            } catch(e) {
-                alert("حدث خطأ في الاتصال بالخادم.");
+
+                rows.forEach(row => {
+                    let time = row[0] ? new Date(row[0]).toLocaleString('ar-EG') : "-";
+                    let ip = row[1] || "-";
+                    let device = row[2] || "-";
+                    let loc = row[3] || "-";
+                    let imgUrl = row[4] || "";
+
+                    let locHtml = loc;
+                    if (loc.includes(",")) {
+                        let coords = loc.trim();
+                        locHtml = `<a href="https://www.google.com/maps?q=${coords}" target="_blank">📍 عرض الموقع على الخريطة</a>`;
+                    }
+
+                    let imgHtml = imgUrl.startsWith("http") ? `<a href="${imgUrl}" target="_blank"><img src="${imgUrl}" alt="صورة"></a>` : "لا توجد صورة";
+
+                    let tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${time}</td>
+                        <td>${ip}</td>
+                        <td><small>${device}</small></td>
+                        <td>${locHtml}</td>
+                        <td>${imgHtml}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                document.getElementById("dataTable").innerHTML = `<tr><td colspan="5">فشل في تحميل البيانات.</td></tr>`;
             }
         }
     </script>
