@@ -3,160 +3,265 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - سجل الحضور والمشاركات</title>
+    <title>نظام الاستعلام عن بيانات الموظفين</title>
     <style>
-        body {
-            font-family: Tahoma, sans-serif;
-            background-color: #f4f7f6;
-            margin: 0;
-            padding: 20px;
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --radius: 12px;
         }
-        .login-container, .dashboard-container {
-            max-width: 900px;
-            margin: 50px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            text-align: center;
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body { 
+            font-family: 'Tahoma', sans-serif; 
+            background: var(--bg-color); 
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
         }
-        .dashboard-container { display: none; text-align: right; max-width: 1100px; }
-        input[type="password"] {
-            padding: 12px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            width: 250px;
-            margin-left: 10px;
-        }
-        button {
-            padding: 12px 20px;
-            font-size: 16px;
-            background: #4f46e5;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        button:hover { background: #4338ca; }
-        .error { color: #e53e3e; margin-top: 10px; display: none; }
-        
-        table {
+
+        .container { 
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+            max-width: 520px; 
+            background: var(--card-bg); 
+            padding: 30px; 
+            border-radius: var(--radius); 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); 
+            border: 1px solid var(--border-color);
         }
-        th, td {
-            border: 1px solid #e2e8f0;
-            padding: 12px;
+
+        .header {
             text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header h2 { 
+            color: var(--primary-color); 
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px; 
+        }
+
+        .header p {
+            color: var(--text-muted);
             font-size: 14px;
         }
-        th { background: #f8fafc; color: #334155; }
-        img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; cursor: pointer; }
-        a { color: #2563eb; text-decoration: none; font-weight: bold; }
-        a:hover { text-decoration: underline; }
-        h2 { color: #1e293b; }
+
+        .search-box { 
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .input-group { 
+            display: flex;
+            flex-direction: column;
+            gap: 6px; 
+        }
+
+        label { 
+            font-weight: 600; 
+            color: var(--text-main); 
+            font-size: 14px;
+        }
+
+        input[type="text"] { 
+            width: 100%; 
+            padding: 12px 16px; 
+            border: 2px solid var(--border-color); 
+            border-radius: 8px; 
+            font-size: 15px; 
+            outline: none;
+            transition: all 0.3s ease;
+            background: #fff;
+        }
+
+        input[type="text"]:focus { 
+            border-color: var(--primary-color); 
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        button { 
+            background: var(--primary-color); 
+            color: white; 
+            border: none; 
+            padding: 14px; 
+            width: 100%; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            font-weight: 600;
+            cursor: pointer; 
+            transition: background 0.3s ease, transform 0.1s ease;
+        }
+
+        button:hover { 
+            background: var(--primary-hover); 
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .results-section { 
+            margin-top: 25px; 
+        }
+
+        .result-card { 
+            background: #f1f5f9; 
+            border: 1px solid var(--border-color);
+            padding: 18px; 
+            border-radius: 10px; 
+            border-right: 5px solid var(--primary-color); 
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .result-card h3 {
+            font-size: 16px;
+            color: var(--primary-color);
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 6px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .result-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .result-row span:first-child {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .result-row span:last-child {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .status-msg { 
+            text-align: center; 
+            color: var(--text-muted); 
+            margin-top: 20px; 
+            font-size: 14px;
+        }
+
+        .status-msg.error {
+            color: #ef4444;
+            background: #fef2f2;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #fee2e2;
+        }
+
+        /* تحسين التجاوب مع شاشات الهواتف الضيقة */
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            .header h2 {
+                font-size: 20px;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
 
-    <!-- نافذة تسجيل الدخول -->
-    <div class="login-container" id="loginBox">
-        <h2>🔒 لوحة التحكم الآمنة</h2>
-        <p>الرجاء إدخال كلمة المرور للوصول إلى السجلات:</p>
-        <input type="password" id="passInput" placeholder="كلمة المرور">
-        <button onclick="checkLogin()">دخول</button>
-        <div class="error" id="errorMsg">كلمة المرور غير صحيحة!</div>
+<div class="container">
+    <div class="header">
+        <h2>نظام الاستعلام الوظيفي</h2>
+        <p>يرجى إدخال الاسم الرباعي بدقة لعرض البيانات</p>
     </div>
-
-    <!-- لوحة عرض البيانات -->
-    <div class="dashboard-container" id="dashBox">
-        <h2>📊 سجلات الحضور والمواقع التقاطية</h2>
-        <p>البيانات يتم تحديثها مباشرة من Google Sheets</p>
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>الوقت والتاريخ</th>
-                        <th>عنوان الـ IP</th>
-                        <th>معلومات الجهاز</th>
-                        <th>الموقع الجغرافي (اضغط للفتح)</th>
-                        <th>الصورة الملتقطة</th>
-                    </tr>
-                </thead>
-                <tbody id="dataTable">
-                    <tr><td colspan="5">جاري جلب البيانات...</td></tr>
-                </tbody>
-            </table>
+    
+    <div class="search-box">
+        <div class="input-group">
+            <label for="searchQuery">الاسم الرباعي واللقب</label>
+            <input type="text" id="searchQuery" placeholder="مثال: أحمد محمد علي حسن" onkeypress="checkEnter(event)">
         </div>
+        
+        <button onclick="searchData()">استعلام عن البيانات</button>
     </div>
 
-    <script>
-        // رابط السكريبت الخاص بك
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzS3Siq7uh6lawPsafgjKWALIv-xtUMCVEsM3nkR2zd6PUTb6-xKTJ6imcjrt8V3OJd/exec";
+    <div class="results-section" id="results"></div>
+</div>
 
-        async function checkLogin() {
-            const pass = document.getElementById("passInput").value;
-            const errorMsg = document.getElementById("errorMsg");
-            
-            try {
-                let res = await fetch(`${SCRIPT_URL}?action=verify&pass=${encodeURIComponent(pass)}`);
-                let data = await res.json();
-                
-                if (data.success) {
-                    document.getElementById("loginBox").style.display = "none";
-                    document.getElementById("dashBox").style.display = "block";
-                    loadData();
-                } else {
-                    errorMsg.style.display = "block";
-                }
-            } catch (e) {
-                alert("حدث خطأ في الاتصال بالخادم.");
-            }
+<script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzYVQhcl3Obs7qN1D8wQBhkHFj9Lo7HHjANYHgIm5brNt6jA5JKne6sZM4YGw9fNJU6RA/exec";
+
+    function checkEnter(e) {
+        if (e.key === 'Enter') {
+            searchData();
+        }
+    }
+
+    function searchData() {
+        const query = document.getElementById('searchQuery').value.trim();
+        const box = document.getElementById('results');
+
+        if (!query) {
+            box.innerHTML = '<p class="status-msg error">الرجاء إدخال الاسم الرباعي كاملأً في حقل البحث.</p>';
+            return;
         }
 
-        async function loadData() {
-            try {
-                let res = await fetch(`${SCRIPT_URL}?action=getData`);
-                let rows = await res.json();
-                let tbody = document.getElementById("dataTable");
-                tbody.innerHTML = "";
+        box.innerHTML = '<p class="status-msg">جاري البحث في السجلات...</p>';
 
-                if (rows.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5">لا توجد سجلات حتى الآن.</td></tr>`;
+        fetch(`${WEB_APP_URL}?name=${encodeURIComponent(query)}`)
+            .then(res => res.json())
+            .then(data => {
+                box.innerHTML = '';
+
+                if (data.length === 0) {
+                    box.innerHTML = '<p class="status-msg error">عذراً، لم يتم العثور على مطابقة تامة لهذا الاسم الرباعي.</p>';
                     return;
                 }
 
-                rows.forEach(row => {
-                    let time = row[0] ? new Date(row[0]).toLocaleString('ar-EG') : "-";
-                    let ip = row[1] || "-";
-                    let device = row[2] || "-";
-                    let loc = row[3] || "-";
-                    let imgUrl = row[4] || "";
-
-                    let locHtml = loc;
-                    if (loc.includes(",")) {
-                        let coords = loc.trim();
-                        locHtml = `<a href="https://www.google.com/maps?q=${coords}" target="_blank">📍 عرض الموقع على الخريطة</a>`;
-                    }
-
-                    let imgHtml = imgUrl.startsWith("http") ? `<a href="${imgUrl}" target="_blank"><img src="${imgUrl}" alt="صورة"></a>` : "لا توجد صورة";
-
-                    let tr = document.createElement("tr");
-                    tr.innerHTML = `
-                        <td>${time}</td>
-                        <td>${ip}</td>
-                        <td><small>${device}</small></td>
-                        <td>${locHtml}</td>
-                        <td>${imgHtml}</td>
+                data.forEach(emp => {
+                    const card = document.createElement('div');
+                    card.className = 'result-card';
+                    card.innerHTML = `
+                        <h3>نتيجة البحث</h3>
+                        <div class="result-row">
+                            <span>الاسم الرباعي:</span>
+                            <span>${emp.fullName}</span>
+                        </div>
+                        <div class="result-row">
+                            <span>اسم الأم:</span>
+                            <span>${emp.motherName}</span>
+                        </div>
+                        <div class="result-row">
+                            <span>الرقم الوظيفي:</span>
+                            <span>${emp.empId}</span>
+                        </div>
                     `;
-                    tbody.appendChild(tr);
+                    box.appendChild(card);
                 });
-            } catch (e) {
-                document.getElementById("dataTable").innerHTML = `<tr><td colspan="5">فشل في تحميل البيانات.</td></tr>`;
-            }
-        }
-    </script>
+            })
+            .catch(err => {
+                console.error(err);
+                box.innerHTML = '<p class="status-msg error">حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة لاحقاً.</p>';
+            });
+    }
+</script>
+
 </body>
 </html>
